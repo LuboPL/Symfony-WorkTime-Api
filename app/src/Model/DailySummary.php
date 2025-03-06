@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-
 final class DailySummary implements WorkTimeCalculatorInterface
 {
     private ?float $payout = null;
@@ -14,20 +13,14 @@ final class DailySummary implements WorkTimeCalculatorInterface
 
     public function calculatePayout(float $rate, float $rateMultiplier): void
     {
+        $this->rate = $rate;
         $rateMultiplier == 0
             ? $this->payout = $this->hours * $rate
             : $this->payout = $this->hours * $rate * $rateMultiplier;
-        $this->rate = $rate;
     }
 
-    public function countNormalHours(): float
+    public function countOvertimeHours(): void
     {
-        return $this->hours;
-    }
-
-    public function countOvertimeHours(): float
-    {
-        return $this->hours;
     }
 
     public function getPayout(): ?float

@@ -34,7 +34,6 @@ readonly class WorkTimeCalculator
 
             return $dailySummary;
         }
-
         $dailySummary->calculatePayout(
             (float)WorkTimeRules::DEFAULT_RATE->value,
             (float)WorkTimeRules::RATE_MULTIPLIER->value
@@ -43,11 +42,30 @@ readonly class WorkTimeCalculator
         return $dailySummary;
     }
 
-    public function calculatePerMonth(): MonthlySummary
+    public function calculatePerMonth(Employee $employee, \DateTimeImmutable $dateTime): ?MonthlySummary
     {
-//        return new MonthlySummary(
-//
-//        );
-    }
+        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth(
+            $employee,
+            (int)$dateTime->format('m'),
+            (int)$dateTime->format('Y')
+        );
+        $monthlySummary = new MonthlySummary($total);
+        if ($total > WorkTimeRules::MONTHLY_NORM->value) {
+            $monthlySummary->calculatePayout(
+                (float)WorkTimeRules::DEFAULT_RATE->value,
+                (float)WorkTimeRules::RATE_MULTIPLIER->value
+            );
+            $monthlySummary->countOvertimeHours();
 
+            return $monthlySummary;
+        }
+
+        $monthlySummary->calculatePayout(
+            (float)WorkTimeRules::DEFAULT_RATE->value,
+            0.0
+        );
+        $monthlySummary->countOvertimeHours();
+
+        return $monthlySummary;
+    }
 }

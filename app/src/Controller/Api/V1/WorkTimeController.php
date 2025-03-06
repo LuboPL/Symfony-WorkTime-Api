@@ -98,8 +98,10 @@ class WorkTimeController extends AbstractController
             Assert::uuid($employeeUuid, 'Invalid employee UUID format.');
             Assert::regex($month, '/^\d{4}-\d{2}$/', 'Invalid month format. Expected format: YYYY-MM');
 
-            DateTimeImmutable::createFromFormat('Y-m', $month);
-            $monthlySummary = $this->workTimeCalculator->calculatePerMonth();
+            $employee = $this->employeeRepository->findById($employeeUuid);
+
+            $date = DateTimeImmutable::createFromFormat('Y-m', $month);
+            $monthlySummary = $this->workTimeCalculator->calculatePerMonth($employee, $date);
         } catch (InvalidArgumentException $e) {
             return $this->json([
                 'response' => $e->getMessage(),
@@ -107,11 +109,11 @@ class WorkTimeController extends AbstractController
         }
 
         return $this->json([
-            'normalHours' => $monthlySummary->normalHours,
-            'rate' => $monthlySummary->rate,
-            'overTimeHours' => $monthlySummary->overTimeHours,
-            'overTimeRate' => $monthlySummary->overTimeRate,
-            'payout' => $monthlySummary->payout
+            'normalHours' => $monthlySummary->getNormalHours(),
+            'rate' => $monthlySummary->getRate(),
+            'overTimeHours' => $monthlySummary->getOverTimeHours(),
+            'overTimeRate' => $monthlySummary->getOverTimeRate(),
+            'payout' => $monthlySummary->getPayout()
         ]);
     }
 }

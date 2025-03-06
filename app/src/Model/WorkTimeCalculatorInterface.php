@@ -6,6 +6,5 @@ namespace App\Model;
 interface WorkTimeCalculatorInterface
 {
     public function calculatePayout(float $rate, float $rateMultiplier): void;
-    public function countNormalHours(): float;
-    public function countOvertimeHours(): float;
+    public function countOvertimeHours(): void;
 }
