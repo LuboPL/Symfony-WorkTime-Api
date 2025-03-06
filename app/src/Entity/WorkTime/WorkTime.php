@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Entity\WorkTime;
 
 use App\Entity\Employee\Employee;
+use App\Enum\WorkTimeRules;
+use App\Exception\WorkTimeException;
 use App\Repository\WorkTime\WorkTimeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
@@ -57,16 +59,26 @@ readonly class WorkTime
         $this->totalHours = $this->roundTotalHours();
     }
 
+    /**
+     * @throws WorkTimeException
+     */
     private function roundTotalHours(): float
     {
         $interval = $this->endTime->diff($this->startTime);
         $hours = $interval->h;
         $minutes = $interval->i;
 
-        return match (true) {
+        $round = match (true) {
             $minutes >= 45 => $hours + 1,
             $minutes >= 15 => $hours + 0.5,
             default => $hours
         };
+
+        return $round > WorkTimeRules::DAILY_HOURS_LIMIT->value
+            ? $round
+            : throw new WorkTimeException(
+                sprintf('Work time cannot be bigger than limited hours: %d',
+                    WorkTimeRules::DAILY_HOURS_LIMIT->value)
+            );
     }
 }
