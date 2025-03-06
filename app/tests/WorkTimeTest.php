@@ -45,7 +45,7 @@ class WorkTimeTest extends TestCase
         return new WorkTime(
             $this->employee,
             new \DateTime($baseDate),
-            new \DateTimeImmutable( sprintf('%s %s', $baseDate, $startTime)),
+            new \DateTimeImmutable(sprintf('%s %s', $baseDate, $startTime)),
             new \DateTimeImmutable(sprintf('%s %s', $baseDate, $endTime))
         );
     }

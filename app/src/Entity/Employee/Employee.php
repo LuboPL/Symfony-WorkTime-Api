@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace App\Entity\Employee;
 
+use App\Repository\Employee\EmployeeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: EmployeeRepository::class)]
 readonly class Employee
 {
     #[ORM\Id]

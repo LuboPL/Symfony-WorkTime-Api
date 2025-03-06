@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace App\Entity\WorkTime;
 
 use App\Entity\Employee\Employee;
+use App\Repository\WorkTime\WorkTimeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: WorkTimeRepository::class)]
 #[ORM\UniqueConstraint(
     name: 'employee_date_unique',
     columns: ['employee_uuid', 'date']
