@@ -1,0 +1,2 @@
+GET http://localhost/api/v1/monthly_summary?employee_uuid={employee_uuid}&month={month}
+Accept: application/json
