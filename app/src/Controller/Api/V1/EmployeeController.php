@@ -32,12 +32,11 @@ class EmployeeController extends AbstractController
         } catch (InvalidArgumentException|\Throwable $e) {
             return $this->json([
                 'response' => $e->getMessage(),
-                400
-            ]);
+            ], 400);
         }
         return $this->json([
             'id' => $employee->uuid,
-            201
-        ]);
+
+        ], 201);
     }
 }

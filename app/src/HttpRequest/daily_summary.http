@@ -1,2 +1,2 @@
-GET http://localhost/api/v1/daily_summary?employee_uuid={employee_uuid}&date={date}
+GET http://localhost/api/v1/daily_summary?employee_uuid=1834fbb4-0557-45e5-8b5f-9f704bd8cd32&date=2025-03-06
 Accept: application/json

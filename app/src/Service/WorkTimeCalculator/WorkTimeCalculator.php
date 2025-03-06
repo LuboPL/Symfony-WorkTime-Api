@@ -3,20 +3,51 @@ declare(strict_types=1);
 
 namespace App\Service\WorkTimeCalculator;
 
-class WorkTimeCalculator implements WorkTimeCalculatorInterface
+use App\Entity\Employee\Employee;
+use App\Enum\WorkTimeRules;
+use App\Model\DailySummary;
+use App\Model\MonthlySummary;
+use App\Repository\WorkTime\WorkTimeRepository;
+
+readonly class WorkTimeCalculator
 {
-    public function calculatePayout(): float
+    public function __construct(private WorkTimeRepository $workTimeRepository)
     {
-        // TODO: Implement calculatePayout() method.
     }
 
-    public function countNormalHours(): float
+    public function calculatePerDay(Employee $employee, \DateTimeImmutable $dateTime): ?DailySummary
     {
-        // TODO: Implement countNormalHours() method.
+        $workTime = $this->workTimeRepository->findOneByEmployeeAndDate($employee, $dateTime);
+
+        if (null === $workTime) {
+            return null;
+        }
+
+        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth(
+            $employee,
+            (int)$dateTime->format('m'),
+            (int)$dateTime->format('Y')
+        );
+        $dailySummary = new DailySummary($workTime->totalHours);
+        if ($total < WorkTimeRules::MONTHLY_NORM->value) {
+            $dailySummary->calculatePayout((float)WorkTimeRules::DEFAULT_RATE->value, 0.0);
+
+            return $dailySummary;
+        }
+
+        $dailySummary->calculatePayout(
+            (float)WorkTimeRules::DEFAULT_RATE->value,
+            (float)WorkTimeRules::RATE_MULTIPLIER->value
+        );
+
+        return $dailySummary;
     }
 
-    public function countOvertimeHours(): float
+    public function calculatePerMonth(): MonthlySummary
     {
-        // TODO: Implement countOvertimeHours() method.
+//        return new MonthlySummary(
+//
+//        );
     }
+
 }

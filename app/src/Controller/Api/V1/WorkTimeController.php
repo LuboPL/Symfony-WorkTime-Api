@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\Employee\Employee;
 use App\Entity\WorkTime\WorkTime;
 use App\Repository\Employee\EmployeeRepository;
 use App\Repository\WorkTime\WorkTimeRepository;
 use App\Service\WorkTimeCalculator\WorkTimeCalculator;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,13 +52,11 @@ class WorkTimeController extends AbstractController
         } catch (InvalidArgumentException|\Throwable $e) {
             return $this->json([
                 'response' => $e->getMessage(),
-                400
-            ]);
+            ], 400);
         }
         return $this->json([
             'Work time added!',
-            201
-        ]);
+        ], 201);
     }
 
     #[Route('/daily_summary', name: 'daily_summary', methods: ['GET'])]
@@ -70,13 +68,23 @@ class WorkTimeController extends AbstractController
         try {
             Assert::uuid($employeeUuid, 'Invalid employee UUID format.');
             Assert::regex($date, '/^\d{4}-\d{2}-\d{2}$/', 'Invalid date format. Expected format: YYYY-MM-DD');
-        } catch (InvalidArgumentException $e) {
 
+            $dateTime = DateTimeImmutable::createFromFormat('Y-m-d', $date);
+            $employee = $this->employeeRepository->findById($employeeUuid);
+            $dailySummary = $this->workTimeCalculator->calculatePerDay($employee, $dateTime);
+            Assert::notNull($dailySummary, 'Daily summary not found.');
+        } catch (InvalidArgumentException|\Throwable $e) {
+            return $this->json([
+                'response' => $e->getMessage(),
+
+            ], 400);
         }
 
 
         return $this->json([
-
+            'payout' => $dailySummary->getPayout(),
+            'totalHours' => $dailySummary->hours,
+            'rate' => $dailySummary->getRate()
         ]);
     }
 
@@ -89,13 +97,21 @@ class WorkTimeController extends AbstractController
         try {
             Assert::uuid($employeeUuid, 'Invalid employee UUID format.');
             Assert::regex($month, '/^\d{4}-\d{2}$/', 'Invalid month format. Expected format: YYYY-MM');
-        } catch (InvalidArgumentException $e) {
 
+            DateTimeImmutable::createFromFormat('Y-m', $month);
+            $monthlySummary = $this->workTimeCalculator->calculatePerMonth();
+        } catch (InvalidArgumentException $e) {
+            return $this->json([
+                'response' => $e->getMessage(),
+            ], 400);
         }
 
-
         return $this->json([
-
+            'normalHours' => $monthlySummary->normalHours,
+            'rate' => $monthlySummary->rate,
+            'overTimeHours' => $monthlySummary->overTimeHours,
+            'overTimeRate' => $monthlySummary->overTimeRate,
+            'payout' => $monthlySummary->payout
         ]);
     }
 }
