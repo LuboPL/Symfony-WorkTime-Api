@@ -1,0 +1,59 @@
+services:
+  app:
+    container_name: php
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/var/www/project/app
+    networks:
+      - app-network
+    environment:
+      - XDEBUG_MODE=debug
+      - DATABASE_URL=mysql://root@mysql:3306/symfony_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./app/public:/var/www/project/app/public
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - app
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: symfony_db
+      MYSQL_ROOT_HOST: '%'
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --bind-address=0.0.0.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
