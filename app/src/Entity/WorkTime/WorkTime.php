@@ -74,7 +74,7 @@ readonly class WorkTime
             default => $hours
         };
 
-        return $round > WorkTimeRules::DAILY_HOURS_LIMIT->value
+        return $round <= WorkTimeRules::DAILY_HOURS_LIMIT->value
             ? $round
             : throw new WorkTimeException(
                 sprintf('Work time cannot be bigger than limited hours: %d',
