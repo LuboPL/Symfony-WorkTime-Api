@@ -1,0 +1,8 @@
+POST  http://localhost/api/v1/register_work_time
+Content-Type: application/json
+
+{
+  "employeeUuid": "1834fbb4-0557-45e5-8b5f-9f704bd8cd32",
+  "starTime": "01.01.1970 08:00",
+  "endTime": "01.01.1970 14:00"
+}

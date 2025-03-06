@@ -29,4 +29,10 @@ class WorkTimeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function save(WorkTime $workTime): void
+    {
+        $this->_em->persist($workTime);
+        $this->_em->flush();
+    }
 }

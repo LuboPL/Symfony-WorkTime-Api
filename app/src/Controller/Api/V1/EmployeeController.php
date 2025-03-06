@@ -18,6 +18,7 @@ class EmployeeController extends AbstractController
     public function __construct(private readonly EmployeeRepository $employeeRepository)
     {
     }
+
     #[Route('/create_employee', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
