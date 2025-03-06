@@ -5,6 +5,8 @@ namespace App\Tests;
 
 use App\Entity\Employee\Employee;
 use App\Entity\WorkTime\WorkTime;
+use App\Enum\WorkTimeRules;
+use App\Exception\WorkTimeException;
 use PHPUnit\Framework\TestCase;
 
 class WorkTimeTest extends TestCase
@@ -35,6 +37,23 @@ class WorkTimeTest extends TestCase
                 $workTime->totalHours
             );
         }
+    }
+
+    public function testHoursExceedsLimit(): void
+    {
+        $this->expectException(WorkTimeException::class);
+        $this->expectExceptionMessage(
+            sprintf(
+                'Work time cannot be bigger than limited hours: %d',
+                WorkTimeRules::DAILY_HOURS_LIMIT->value
+            )
+        );
+        new WorkTime(
+            $this->employee,
+            new \DateTime('2025-03-06'),
+            new \DateTimeImmutable('2025-03-06 01:00'),
+            new \DateTimeImmutable('2025-03-06 14:00')
+        );
     }
 
     private function createWorkTimeWithInterval(

@@ -30,6 +30,9 @@ readonly class WorkTime
     )]
     public float $totalHours;
 
+    /**
+     * @throws WorkTimeException
+     */
     public function __construct(
         #[ORM\ManyToOne(targetEntity: Employee::class)]
         #[ORM\JoinColumn(
