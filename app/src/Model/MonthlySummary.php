@@ -3,41 +3,35 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-use App\Enum\WorkTimeRules;
-
-final class MonthlySummary implements WorkTimeCalculatorInterface
+final class MonthlySummary implements SummaryInterface
 {
-    private float $payout;
-    private ?float $overTimeHours = null;
+    private float $payout = 0.0;
+    private float $overTimeHours;
     private float $rate;
     private float $overTimeRate;
     private float $normalHours;
+    private float $rateMultiplier;
 
-    public function __construct(private readonly float $totalHours)
+    public function __construct(private readonly float $totalHoursInMonth)
     {
-        $this->overTimeRate = (float)WorkTimeRules::DEFAULT_RATE->value * (float)WorkTimeRules::RATE_MULTIPLIER->value;
-        
-        if ($this->totalHours > WorkTimeRules::MONTHLY_NORM->value) {
-            $this->normalHours = (float)WorkTimeRules::MONTHLY_NORM->value;
+        $this->rate = WorkTimeRules::DEFAULT_RATE;
+        if ($this->totalHoursInMonth >= WorkTimeRules::MONTHLY_NORM) {
+            $this->rateMultiplier = WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER;
+            $this->normalHours = WorkTimeRules::MONTHLY_NORM;
+            $this->overTimeRate = WorkTimeRules::DEFAULT_RATE * $this->rateMultiplier;
+            $this->overTimeHours = $this->totalHoursInMonth - $this->normalHours;
         } else {
-            $this->normalHours = $totalHours;
+            $this->normalHours = $this->totalHoursInMonth;
+            $this->rateMultiplier = 1.0;
+            $this->overTimeHours = 0.0;
+            $this->overTimeRate = WorkTimeRules::DEFAULT_RATE * WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER;
         }
     }
 
-    public function calculatePayout(float $rate, float $rateMultiplier): void
+    public function calculatePayout(): void
     {
-        $this->rate = $rate;
-        $this->payout = $rate * $this->normalHours;
-
-        if ($rateMultiplier != 0) {
-            $this->payout += $rate * $this->normalHours * $rateMultiplier;
-            $this->overTimeRate = $this->rate * $rateMultiplier;
-        }
-    }
-
-    public function countOvertimeHours(): void
-    {
-        $this->overTimeHours = $this->totalHours - $this->normalHours;
+        $this->payout += $this->overTimeHours * $this->overTimeRate;
+        $this->payout += $this->normalHours * $this->rate;
     }
 
     public function getPayout(): float

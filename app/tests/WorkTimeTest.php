@@ -5,8 +5,8 @@ namespace App\Tests;
 
 use App\Entity\Employee\Employee;
 use App\Entity\WorkTime\WorkTime;
-use App\Enum\WorkTimeRules;
 use App\Exception\WorkTimeException;
+use App\Model\WorkTimeRules;
 use PHPUnit\Framework\TestCase;
 
 class WorkTimeTest extends TestCase
@@ -45,7 +45,7 @@ class WorkTimeTest extends TestCase
         $this->expectExceptionMessage(
             sprintf(
                 'Work time cannot be bigger than limited hours: %d',
-                WorkTimeRules::DAILY_HOURS_LIMIT->value
+                WorkTimeRules::DAILY_HOURS_LIMIT
             )
         );
         new WorkTime(

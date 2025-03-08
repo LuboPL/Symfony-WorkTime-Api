@@ -37,9 +37,11 @@ class WorkTimeRepository extends ServiceEntityRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getTotalHoursByEmployeeAndMonth(Employee $employee, int $month, int $year): float
+    public function getTotalHoursByEmployeeAndMonth(Employee $employee, \DateTimeImmutable $dateTime): float
     {
-        $firstDayOfMonth = new \DateTime("$year-$month-01");
+        $firstDayOfMonth = new \DateTime(
+            sprintf('%s-%s-01', $dateTime->format('Y'), $dateTime->format('m'))
+        );
 
         $firstDayOfNextMonth = clone $firstDayOfMonth;
         $firstDayOfNextMonth->modify('+1 month');

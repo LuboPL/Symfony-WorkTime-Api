@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller\Api\V1;
 
 use App\Entity\WorkTime\WorkTime;
+use App\Model\WorkTimeRules;
 use App\Repository\Employee\EmployeeRepository;
 use App\Repository\WorkTime\WorkTimeRepository;
 use App\Service\WorkTimeCalculator\WorkTimeCalculator;
@@ -19,6 +20,7 @@ use Webmozart\Assert\InvalidArgumentException;
 class WorkTimeController extends AbstractController
 {
     private const TIME_REGEX = '/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$/';
+
     public function __construct(
         private readonly WorkTimeRepository $workTimeRepository,
         private readonly EmployeeRepository $employeeRepository,
@@ -83,8 +85,8 @@ class WorkTimeController extends AbstractController
 
         return $this->json([
             'payout' => $dailySummary->getPayout(),
-            'totalHours' => $dailySummary->hours,
-            'rate' => $dailySummary->getRate()
+            'totalHours' => $dailySummary->getHoursInDay(),
+            'rate' => sprintf('%s %s', $dailySummary->getRate(), WorkTimeRules::DEFAULT_CURRENCY),
         ]);
     }
 
@@ -102,7 +104,7 @@ class WorkTimeController extends AbstractController
 
             $date = DateTimeImmutable::createFromFormat('Y-m', $month);
             $monthlySummary = $this->workTimeCalculator->calculatePerMonth($employee, $date);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException|\Throwable $e) {
             return $this->json([
                 'response' => $e->getMessage(),
             ], 400);
@@ -112,8 +114,8 @@ class WorkTimeController extends AbstractController
             'normalHours' => $monthlySummary->getNormalHours(),
             'rate' => $monthlySummary->getRate(),
             'overTimeHours' => $monthlySummary->getOverTimeHours(),
-            'overTimeRate' => $monthlySummary->getOverTimeRate(),
-            'payout' => $monthlySummary->getPayout()
+            'overTimeRate' => sprintf('%s %s', $monthlySummary->getOverTimeRate(), WorkTimeRules::DEFAULT_CURRENCY),
+            'payout' => sprintf('%s %s', $monthlySummary->getPayout(), WorkTimeRules::DEFAULT_CURRENCY),
         ]);
     }
 }

@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace App\Service\WorkTimeCalculator;
 
 use App\Entity\Employee\Employee;
-use App\Enum\WorkTimeRules;
 use App\Model\DailySummary;
 use App\Model\MonthlySummary;
+use App\Model\SummaryInterface;
 use App\Repository\WorkTime\WorkTimeRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
 readonly class WorkTimeCalculator
 {
@@ -15,56 +17,32 @@ readonly class WorkTimeCalculator
     {
     }
 
-    public function calculatePerDay(Employee $employee, \DateTimeImmutable $dateTime): ?DailySummary
+    /**
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function calculatePerDay(Employee $employee, \DateTimeImmutable $dateTime): SummaryInterface
     {
         $workTime = $this->workTimeRepository->findOneByEmployeeAndDate($employee, $dateTime);
+        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth($employee, $dateTime);
 
-        if (null === $workTime) {
-            return null;
-        }
-
-        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth(
-            $employee,
-            (int)$dateTime->format('m'),
-            (int)$dateTime->format('Y')
-        );
-        $dailySummary = new DailySummary($workTime->totalHours);
-        if ($total < WorkTimeRules::MONTHLY_NORM->value) {
-            $dailySummary->calculatePayout((float)WorkTimeRules::DEFAULT_RATE->value, 0.0);
-
-            return $dailySummary;
-        }
-        $dailySummary->calculatePayout(
-            (float)WorkTimeRules::DEFAULT_RATE->value,
-            (float)WorkTimeRules::RATE_MULTIPLIER->value
-        );
+        $dailySummary = new DailySummary($workTime->totalHours, $total);
+        $dailySummary->calculatePayout();
 
         return $dailySummary;
     }
 
-    public function calculatePerMonth(Employee $employee, \DateTimeImmutable $dateTime): ?MonthlySummary
+    /**
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function calculatePerMonth(Employee $employee, \DateTimeImmutable $dateTime): SummaryInterface
     {
-        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth(
-            $employee,
-            (int)$dateTime->format('m'),
-            (int)$dateTime->format('Y')
-        );
+        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth($employee, $dateTime);
         $monthlySummary = new MonthlySummary($total);
-        if ($total > WorkTimeRules::MONTHLY_NORM->value) {
-            $monthlySummary->calculatePayout(
-                (float)WorkTimeRules::DEFAULT_RATE->value,
-                (float)WorkTimeRules::RATE_MULTIPLIER->value
-            );
-            $monthlySummary->countOvertimeHours();
-
-            return $monthlySummary;
-        }
-
-        $monthlySummary->calculatePayout(
-            (float)WorkTimeRules::DEFAULT_RATE->value,
-            0.0
-        );
-        $monthlySummary->countOvertimeHours();
+        $monthlySummary->calculatePayout();
 
         return $monthlySummary;
     }
