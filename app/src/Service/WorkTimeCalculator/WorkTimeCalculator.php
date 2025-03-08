@@ -25,7 +25,7 @@ readonly class WorkTimeCalculator
     public function calculatePerDay(Employee $employee, \DateTimeImmutable $dateTime): SummaryInterface
     {
         $workTime = $this->workTimeRepository->findOneByEmployeeAndDate($employee, $dateTime);
-        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonth($employee, $dateTime);
+        $total = $this->workTimeRepository->getTotalHoursByEmployeeAndMonthUntilDay($employee, $dateTime);
 
         $dailySummary = new DailySummary($workTime->totalHours, $total);
         $dailySummary->calculatePayout();

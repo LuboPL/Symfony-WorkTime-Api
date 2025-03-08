@@ -10,22 +10,16 @@ final class MonthlySummary implements SummaryInterface
     private float $rate;
     private float $overTimeRate;
     private float $normalHours;
-    private float $rateMultiplier;
 
     public function __construct(private readonly float $totalHoursInMonth)
     {
         $this->rate = WorkTimeRules::DEFAULT_RATE;
-        if ($this->totalHoursInMonth >= WorkTimeRules::MONTHLY_NORM) {
-            $this->rateMultiplier = WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER;
-            $this->normalHours = WorkTimeRules::MONTHLY_NORM;
-            $this->overTimeRate = WorkTimeRules::DEFAULT_RATE * $this->rateMultiplier;
-            $this->overTimeHours = $this->totalHoursInMonth - $this->normalHours;
-        } else {
-            $this->normalHours = $this->totalHoursInMonth;
-            $this->rateMultiplier = 1.0;
-            $this->overTimeHours = 0.0;
-            $this->overTimeRate = WorkTimeRules::DEFAULT_RATE * WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER;
-        }
+
+        $isOverTime = $this->totalHoursInMonth >= WorkTimeRules::MONTHLY_NORM;
+
+        $this->normalHours = $isOverTime ? WorkTimeRules::MONTHLY_NORM : $this->totalHoursInMonth;
+        $this->overTimeHours = $isOverTime ? $this->totalHoursInMonth - WorkTimeRules::MONTHLY_NORM : 0.0;
+        $this->overTimeRate = WorkTimeRules::DEFAULT_RATE * WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER;
     }
 
     public function calculatePayout(): void

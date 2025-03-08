@@ -60,6 +60,34 @@ class WorkTimeRepository extends ServiceEntityRepository
         return (float)$result;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getTotalHoursByEmployeeAndMonthUntilDay(Employee $employee, \DateTimeImmutable $dateTime): float
+    {
+        $firstDayOfMonth = new \DateTime(
+            sprintf('%s-%s-01', $dateTime->format('Y'), $dateTime->format('m'))
+        );
+
+        $untilDay = clone $firstDayOfMonth;
+        $untilDay->modify(sprintf('+%d days', $dateTime->format('d')));
+
+        $result = $this->createQueryBuilder('wt')
+            ->select('SUM(wt.totalHours) as totalMonthHours')
+            ->where('wt.employee = :employee')
+            ->andWhere('wt.date >= :startDate')
+            ->andWhere('wt.date < :endDate')
+            ->setParameter('employee', $employee)
+            ->setParameter('startDate', $firstDayOfMonth)
+            ->setParameter('endDate', $untilDay)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (float)$result;
+    }
+
     public function save(WorkTime $workTime): void
     {
         $this->_em->persist($workTime);

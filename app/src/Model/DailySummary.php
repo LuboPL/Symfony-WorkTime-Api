@@ -5,14 +5,16 @@ namespace App\Model;
 
 final class DailySummary implements SummaryInterface
 {
-    private float $payout;
+    private float $payout = 0.0;
     private float $rateMultiplier;
     private float $rate;
-    public function __construct(private readonly float $hoursInDay, private readonly float $totalHoursInMonth)
+    public function __construct(private ?float $hoursInDay, private readonly float $totalHoursInMonth)
     {
-        $this->totalHoursInMonth > WorkTimeRules::MONTHLY_NORM
-        ? $this->rateMultiplier = WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER
-        : $this->rateMultiplier = 1.0;
+        $this->hoursInDay ??= 0.0;
+
+        $this->rateMultiplier = $this->totalHoursInMonth > WorkTimeRules::MONTHLY_NORM
+            ? WorkTimeRules::OVER_HOURS_RATE_MULTIPLIER
+            : 1.0;
         $this->rate = WorkTimeRules::DEFAULT_RATE * $this->rateMultiplier;
     }
 
