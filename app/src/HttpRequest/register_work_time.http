@@ -3,6 +3,6 @@ Content-Type: application/json
 
 {
   "employeeUuid": "1834fbb4-0557-45e5-8b5f-9f704bd8cd32",
-  "starTime": "01.01.1970 08:00",
-  "endTime": "01.01.1970 14:00"
+  "startTime": "08.03.2025 08:00",
+  "endTime": "08.03.2025 14:00"
 }

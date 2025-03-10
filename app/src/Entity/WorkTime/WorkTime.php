@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Entity\WorkTime;
 
 use App\Entity\Employee\Employee;
-use App\Enum\WorkTimeRules;
 use App\Exception\WorkTimeException;
+use App\Model\WorkTimeRules;
 use App\Repository\WorkTime\WorkTimeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
@@ -77,11 +77,11 @@ readonly class WorkTime
             default => $hours
         };
 
-        return $round <= WorkTimeRules::DAILY_HOURS_LIMIT->value
+        return $round <= WorkTimeRules::DAILY_HOURS_LIMIT
             ? $round
             : throw new WorkTimeException(
                 sprintf('Work time cannot be bigger than limited hours: %d',
-                    WorkTimeRules::DAILY_HOURS_LIMIT->value)
+                    WorkTimeRules::DAILY_HOURS_LIMIT)
             );
     }
 }
