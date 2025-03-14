@@ -52,4 +52,15 @@ final class MonthlySummary implements SummaryInterface
     {
         return $this->normalHours;
     }
+
+    public function getPayload(): array
+    {
+        return [
+            'normalHours' => $this->normalHours,
+            'rate' => sprintf('%s %s', $this->rate, WorkTimeRules::DEFAULT_CURRENCY),
+            'overTimeHours' => $this->overTimeHours,
+            'overTimeRate' => sprintf('%s %s', $this->overTimeRate, WorkTimeRules::DEFAULT_CURRENCY),
+            'payout' => sprintf('%s %s', $this->payout, WorkTimeRules::DEFAULT_CURRENCY)
+        ];
+    }
 }

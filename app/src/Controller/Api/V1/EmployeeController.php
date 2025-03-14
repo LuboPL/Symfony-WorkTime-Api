@@ -3,19 +3,21 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\Employee\Employee;
-use App\Repository\Employee\EmployeeRepository;
+use App\Service\Employee\EmployeeService;
+use App\Service\PayloadValidator\Validator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Webmozart\Assert\Assert;
 use Webmozart\Assert\InvalidArgumentException;
 
 #[Route('/api/v1', name: 'api_v1')]
 class EmployeeController extends AbstractController
 {
-    public function __construct(private readonly EmployeeRepository $employeeRepository)
+    public function __construct(
+        private readonly Validator $validator,
+        private readonly EmployeeService $employeeService
+    )
     {
     }
 
@@ -24,11 +26,9 @@ class EmployeeController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         try {
-            Assert::stringNotEmpty($data['firstName'], 'First name should not be empty');
-            Assert::stringNotEmpty($data['lastName'], 'Last name should not be empty');
-
-            $employee = new Employee($data['firstName'], $data['lastName']);
-            $this->employeeRepository->save($employee);
+            $this->validator->validateNames($data);
+            $employee = $this->employeeService->createEmployee($data);
+            $this->employeeService->saveEmployee($employee);
         } catch (InvalidArgumentException|\Throwable $e) {
             return $this->json([
                 'response' => $e->getMessage(),

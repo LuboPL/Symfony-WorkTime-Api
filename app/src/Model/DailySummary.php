@@ -37,4 +37,13 @@ final class DailySummary implements SummaryInterface
     {
         return $this->hoursInDay;
     }
+
+    public function getPayload(): array
+    {
+        return [
+            'payout' => sprintf('%d %s',$this->payout, WorkTimeRules::DEFAULT_CURRENCY),
+            'totalHours' => $this->hoursInDay,
+            'rate' => sprintf('%s %s', $this->rate, WorkTimeRules::DEFAULT_CURRENCY)
+        ];
+    }
 }

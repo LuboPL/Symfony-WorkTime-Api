@@ -6,4 +6,5 @@ namespace App\Model;
 interface SummaryInterface
 {
     public function calculatePayout(): void;
+    public function getPayload(): array;
 }
