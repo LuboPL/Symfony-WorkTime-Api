@@ -11,11 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
 #[ORM\Entity(repositoryClass: WorkTimeRepository::class)]
-#[ORM\UniqueConstraint(
-    name: 'employee_date_unique',
-    columns: ['employee_uuid', 'date']
-)]
-readonly class WorkTime
+#[ORM\Table(uniqueConstraints: [
+    new ORM\UniqueConstraint(
+        name: 'employee_date_unique',
+        columns: ['employee_uuid', 'date']
+    )
+])]
+class WorkTime
 {
     #[ORM\Id]
     #[ORM\Column(

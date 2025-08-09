@@ -8,11 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
-#[ORM\UniqueConstraint(
-    name: 'employee_date_unique',
-    columns: ['first_name', 'last_name']
-)]
-readonly class Employee
+#[ORM\Table(uniqueConstraints: [
+    new ORM\UniqueConstraint(
+        name: 'employee_date_unique',
+        columns: ['first_name', 'last_name']
+    )
+])]
+class Employee
 {
     #[ORM\Id]
     #[ORM\Column(
